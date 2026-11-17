@@ -1,0 +1,18 @@
+/* Unified Layout, Spacing and Overflow Guards */
+.page-container {
+  width: 100%;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+
+.section-spacing {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: clip;
+  box-sizing: border-box;
+}

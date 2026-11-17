@@ -1,0 +1,234 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isAuthenticated() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isBootstrappedAdmin() {
+      return isEmailVerified() && request.auth.token.email == '7175ismail@gmail.com';
+    }
+
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function hasRole(allowedRoles) {
+      return isEmailVerified() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUserDoc().data.role in allowedRoles;
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || hasRole(['admin']);
+    }
+
+    function isModerator() {
+      return isBootstrappedAdmin() || hasRole(['admin', 'moderator']);
+    }
+
+    function isValidHttpUrl(url) {
+      return url is string &&
+        url.size() >= 10 &&
+        url.size() <= 500 &&
+        (url.matches('^https://.*') || url.matches('^http://.*'));
+    }
+
+    function isBoundedString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    // ===============================================================
+    // Validators
+    // ===============================================================
+
+    function isValidUserCreate(data, userId) {
+      return data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'createdAt']) &&
+        data.uid == userId &&
+        isBoundedString(data.email, 3, 200) &&
+        isBoundedString(data.displayName, 1, 120) &&
+        isBoundedString(data.createdAt, 10, 40) &&
+        (data.role == 'student' || isBootstrappedAdmin());
+    }
+
+    function isValidUserSelfUpdate(newData, oldData) {
+      return newData.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'createdAt']) &&
+        newData.uid == oldData.uid &&
+        newData.role == oldData.role &&
+        newData.createdAt == oldData.createdAt &&
+        isBoundedString(newData.email, 3, 200) &&
+        isBoundedString(newData.displayName, 1, 120);
+    }
+
+    function isValidNewFeedback(data) {
+      return data.keys().hasOnly([
+          'id',
+          'institution_id',
+          'institution_code',
+          'institution_name_ar',
+          'institution_name_fr',
+          'service_category',
+          'service_label_ar',
+          'service_label_fr',
+          'rating',
+          'comment_ar',
+          'comment_fr',
+          'student_level_ar',
+          'student_level_fr',
+          'created_at',
+          'status'
+        ]) &&
+        isBoundedString(data.id, 3, 80) &&
+        isBoundedString(data.institution_id, 2, 100) &&
+        isBoundedString(data.institution_code, 1, 40) &&
+        isBoundedString(data.institution_name_ar, 2, 200) &&
+        isBoundedString(data.institution_name_fr, 2, 200) &&
+        data.service_category in ['digital_services', 'library', 'administration', 'student_life'] &&
+        isBoundedString(data.service_label_ar, 2, 150) &&
+        isBoundedString(data.service_label_fr, 2, 150) &&
+        data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+        isBoundedString(data.comment_ar, 10, 1500) &&
+        isBoundedString(data.comment_fr, 10, 1500) &&
+        isBoundedString(data.student_level_ar, 2, 120) &&
+        isBoundedString(data.student_level_fr, 2, 120) &&
+        isBoundedString(data.created_at, 8, 40) &&
+        data.status == 'pending';
+    }
+
+    function isValidModeratedFeedback(newData, oldData) {
+      return newData.keys().hasOnly([
+          'id',
+          'institution_id',
+          'institution_code',
+          'institution_name_ar',
+          'institution_name_fr',
+          'service_category',
+          'service_label_ar',
+          'service_label_fr',
+          'rating',
+          'comment_ar',
+          'comment_fr',
+          'student_level_ar',
+          'student_level_fr',
+          'created_at',
+          'status',
+          'moderated_at'
+        ]) &&
+        newData.id == oldData.id &&
+        newData.institution_id == oldData.institution_id &&
+        newData.comment_ar == oldData.comment_ar &&
+        newData.comment_fr == oldData.comment_fr &&
+        newData.rating == oldData.rating &&
+        newData.status in ['pending', 'approved', 'rejected'] &&
+        (!('moderated_at' in newData) || isBoundedString(newData.moderated_at, 8, 40));
+    }
+
+    function isValidNewReport(data) {
+      return data.keys().hasOnly([
+          'id',
+          'target_id',
+          'target_name',
+          'field_name',
+          'current_value',
+          'proposed_correction',
+          'source_proof_url',
+          'user_notes',
+          'reporter_email',
+          'created_at',
+          'status'
+        ]) &&
+        isBoundedString(data.id, 3, 80) &&
+        isBoundedString(data.target_id, 2, 100) &&
+        isBoundedString(data.target_name, 2, 220) &&
+        isBoundedString(data.field_name, 2, 120) &&
+        isBoundedString(data.current_value, 1, 500) &&
+        isBoundedString(data.proposed_correction, 2, 500) &&
+        isValidHttpUrl(data.source_proof_url) &&
+        (!('user_notes' in data) || isBoundedString(data.user_notes, 0, 1000)) &&
+        (!('reporter_email' in data) || isBoundedString(data.reporter_email, 0, 200)) &&
+        isBoundedString(data.created_at, 8, 40) &&
+        data.status == 'pending';
+    }
+
+    function isValidInstitutionOverride(data) {
+      return data.keys().hasAll([
+          'id', 'code', 'university_id', 'name_ar', 'name_fr',
+          'website_url', 'source_url', 'verified_at', 'data_status'
+        ]) &&
+        isBoundedString(data.id, 2, 100) &&
+        isBoundedString(data.code, 1, 40) &&
+        isBoundedString(data.name_ar, 2, 200) &&
+        isBoundedString(data.name_fr, 2, 200) &&
+        isValidHttpUrl(data.website_url) &&
+        data.data_status in ['verified', 'needs_review', 'demo'];
+    }
+
+    function isValidUniversityOverride(data) {
+      return data.keys().hasAll([
+          'id', 'code', 'name_ar', 'name_fr',
+          'website_url', 'source_url', 'verified_at', 'data_status'
+        ]) &&
+        isBoundedString(data.id, 2, 100) &&
+        isBoundedString(data.code, 1, 40) &&
+        isBoundedString(data.name_ar, 2, 200) &&
+        isBoundedString(data.name_fr, 2, 200) &&
+        isValidHttpUrl(data.website_url) &&
+        data.data_status in ['verified', 'needs_review', 'demo'];
+    }
+
+    // ===============================================================
+    // Collections
+    // ===============================================================
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUserCreate(request.resource.data, userId);
+      allow update: if isAdmin() || (isOwner(userId) && isValidUserSelfUpdate(request.resource.data, resource.data));
+      allow delete: if isAdmin();
+    }
+
+    match /feedbacks/{feedbackId} {
+      allow read: if resource.data.status == 'approved' || isModerator();
+      allow create: if isValidNewFeedback(request.resource.data);
+      allow update: if isModerator() && isValidModeratedFeedback(request.resource.data, resource.data);
+      allow delete: if isModerator();
+    }
+
+    match /reports/{reportId} {
+      allow read: if isModerator();
+      allow create: if isValidNewReport(request.resource.data);
+      allow update: if isModerator() && request.resource.data.status in ['pending', 'reviewed', 'approved', 'rejected'];
+      allow delete: if isModerator();
+    }
+
+    match /institution_overrides/{instId} {
+      allow read: if true;
+      allow create, update: if isModerator() && isValidInstitutionOverride(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /university_overrides/{univId} {
+      allow read: if true;
+      allow create, update: if isModerator() && isValidUniversityOverride(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

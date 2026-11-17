@@ -1,0 +1,141 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated governance user profile with RBAC role.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "moderator", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "displayName", "role", "createdAt"]
+    },
+    "StudentFeedback": {
+      "title": "StudentFeedback",
+      "description": "Anonymous student experience & service quality rating subject to pre-moderation.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "institution_id": { "type": "string" },
+        "institution_code": { "type": "string" },
+        "institution_name_ar": { "type": "string" },
+        "institution_name_fr": { "type": "string" },
+        "service_category": {
+          "type": "string",
+          "enum": ["digital_services", "library", "administration", "student_life"]
+        },
+        "service_label_ar": { "type": "string" },
+        "service_label_fr": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment_ar": { "type": "string" },
+        "comment_fr": { "type": "string" },
+        "student_level_ar": { "type": "string" },
+        "student_level_fr": { "type": "string" },
+        "created_at": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "moderated_at": { "type": "string" }
+      },
+      "required": [
+        "id",
+        "institution_id",
+        "institution_code",
+        "institution_name_ar",
+        "institution_name_fr",
+        "service_category",
+        "service_label_ar",
+        "service_label_fr",
+        "rating",
+        "comment_ar",
+        "comment_fr",
+        "student_level_ar",
+        "student_level_fr",
+        "created_at",
+        "status"
+      ]
+    },
+    "InaccuracyReport": {
+      "title": "InaccuracyReport",
+      "description": "Community-submitted correction ticket backed by an official proof URL.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "target_id": { "type": "string" },
+        "target_name": { "type": "string" },
+        "field_name": { "type": "string" },
+        "current_value": { "type": "string" },
+        "proposed_correction": { "type": "string" },
+        "source_proof_url": { "type": "string" },
+        "user_notes": { "type": "string" },
+        "created_at": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "reviewed", "approved", "rejected"] }
+      },
+      "required": [
+        "id",
+        "target_id",
+        "target_name",
+        "field_name",
+        "current_value",
+        "proposed_correction",
+        "source_proof_url",
+        "created_at",
+        "status"
+      ]
+    },
+    "InstitutionOverride": {
+      "title": "InstitutionOverride",
+      "description": "Verified higher education institution record added or updated by moderators.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "code": { "type": "string" },
+        "university_id": { "type": "string" },
+        "name_ar": { "type": "string" },
+        "name_fr": { "type": "string" },
+        "website_url": { "type": "string" },
+        "data_status": { "type": "string", "enum": ["verified", "needs_review", "demo"] },
+        "verified_at": { "type": "string" }
+      },
+      "required": ["id", "code", "university_id", "name_ar", "name_fr", "website_url", "data_status", "verified_at"]
+    },
+    "UniversityOverride": {
+      "title": "UniversityOverride",
+      "description": "Verified Moroccan public university record updated by moderators.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "code": { "type": "string" },
+        "name_ar": { "type": "string" },
+        "name_fr": { "type": "string" },
+        "website_url": { "type": "string" },
+        "data_status": { "type": "string", "enum": ["verified", "needs_review", "demo"] },
+        "verified_at": { "type": "string" }
+      },
+      "required": ["id", "code", "name_ar", "name_fr", "website_url", "data_status", "verified_at"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles for RBAC roles (admin/moderator/student)."
+    },
+    "/feedbacks/{feedbackId}": {
+      "schema": { "$ref": "#/entities/StudentFeedback" },
+      "description": "Anonymous student feedbacks. Approved entries are public; pending/rejected are moderator-only."
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/InaccuracyReport" },
+      "description": "Data inaccuracy reports submitted by users for moderator review."
+    },
+    "/institution_overrides/{instId}": {
+      "schema": { "$ref": "#/entities/InstitutionOverride" },
+      "description": "Verified institution additions and edits maintained by moderators."
+    },
+    "/university_overrides/{univId}": {
+      "schema": { "$ref": "#/entities/UniversityOverride" },
+      "description": "Verified university edits maintained by moderators."
+    }
+  }
+}
