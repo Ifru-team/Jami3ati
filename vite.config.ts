@@ -4,8 +4,11 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const base = process.env.VITE_BASE || '/';
+
 export default defineConfig(() => {
   return {
+    base,
     plugins: [
       react(),
       tailwindcss(),
@@ -20,30 +23,30 @@ export default defineConfig(() => {
           maximumFileSizeToCacheInBytes: 6291456,
         },
         manifest: {
-          id: '/',
+          id: base,
           name: 'جامعتي | Jami3ati',
           short_name: 'Jami3ati',
           description: 'دليل موحد للخدمات والمعلومات الجامعية بالمغرب عبر البيانات المفتوحة',
           theme_color: '#143D30',
           background_color: '#FAF8F5',
           display: 'standalone',
-          start_url: '/',
-          scope: '/',
+          start_url: base,
+          scope: base,
           icons: [
             {
-              src: '/pwa-192x192.png',
+              src: `${base}pwa-192x192.png`,
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/pwa-512x512.png',
+              src: `${base}pwa-512x512.png`,
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/pwa-maskable-512x512.png',
+              src: `${base}pwa-maskable-512x512.png`,
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable',
