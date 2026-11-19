@@ -93,12 +93,14 @@ export const NavigationDrawer: React.FC<Props> = ({
         {/* Drawer Header */}
         <div className="p-4 sm:p-5 border-b border-stone-200 flex items-center justify-between bg-stone-50/70 shrink-0">
           <div className="flex items-center gap-2.5">
-            <img
-              src="/assets/aistudio/jami3ati_logo_transparent.png"
-              alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
-              className="w-11 h-11 rounded-xl object-contain shrink-0"
-              referrerPolicy="no-referrer"
-            />
+            <div className="w-14 h-14 overflow-hidden shrink-0 flex items-center justify-center">
+              <img
+                src="/assets/aistudio/jami3ati_emblem_transparent.png"
+                alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
+                className="w-full h-[130%] object-cover object-top"
+                referrerPolicy="no-referrer"
+              />
+            </div>
             <div>
               <span className="font-bold text-stone-900 text-sm block">{isAr ? 'جامعتي | Jami3ati' : 'Jami3ati | جامعتي'}</span>
               <span className="text-[11px] text-stone-500 block">

@@ -28,7 +28,6 @@ import { AnalyticsModal } from './components/AnalyticsModal';
 import { InteractiveMap } from './components/InteractiveMap';
 import { ModeratorPortal } from './components/ModeratorPortal';
 import { ModeratorLoginModal, type ModeratorUser } from './components/ModeratorLoginModal';
-import { StudentFeedbackSection } from './components/StudentFeedbackSection';
 import { FilterPanel } from './components/FilterPanel';
 import { SearchBar } from './components/SearchBar';
 import { BottomNavBar } from './components/BottomNavBar';
@@ -181,8 +180,17 @@ export default function App() {
 
   // Active Dedicated Route state synchronized with window.location.hash
   const [currentRoute, setCurrentRoute] = useState<AppRoute>(getRouteFromHash);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navigateTo = (route: AppRoute) => {
     setCurrentRoute(route);
@@ -960,7 +968,11 @@ export default function App() {
       </div>
 
       {/* Unified Site Header Across All Pages */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200">
+      <header className={`sticky top-0 z-40 transition-all duration-300 border-b ${
+        isScrolled
+          ? 'bg-white/95 backdrop-blur-md shadow-sm border-stone-200'
+          : 'bg-white/80 backdrop-blur-sm border-stone-200/60 shadow-xs'
+      }`}>
         <div className="max-w-6xl mx-auto px-1.5 min-[375px]:px-2 sm:px-6 h-13 sm:h-16 flex items-center justify-between gap-1 sm:gap-4 xl:gap-8 w-full">
           {/* Zone 1: Logo & Wordmark */}
           <button
@@ -969,13 +981,15 @@ export default function App() {
             className="text-sm min-[375px]:text-[15px] sm:text-lg font-bold tracking-tight text-[#143D30] whitespace-nowrap shrink-0 flex items-center gap-1 min-[375px]:gap-1.5 sm:gap-2 focus-visible:ring-2 focus-visible:ring-[#143D30] focus-visible:outline-none rounded-lg p-0.5 sm:p-1"
             aria-label={isAr ? 'العودة إلى الصفحة الرئيسية — جامعتي' : 'Retour à l’accueil — Jami3ati'}
           >
-            <img
-              src="/assets/aistudio/jami3ati_logo_transparent.png"
-              alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
-              className="w-7 h-7 min-[375px]:w-8 min-[375px]:h-8 sm:w-10 sm:h-10 rounded-xl object-contain shrink-0"
-              referrerPolicy="no-referrer"
-            />
-            <span className="flex items-center gap-1.5 font-extrabold">
+            <div className="w-11 h-11 min-[375px]:w-12 min-[375px]:h-12 sm:w-14 sm:h-14 overflow-hidden shrink-0 flex items-center justify-center transition-all duration-200 hover:scale-105">
+              <img
+                src="/assets/aistudio/jami3ati_emblem_transparent.png"
+                alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
+                className="w-full h-[130%] object-cover object-top"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <span className="flex items-center gap-1.5 font-extrabold text-[#143D30]">
               <span>{isAr ? 'جامعتي' : 'Jami3ati'}</span>
               <span className="hidden xl:inline text-stone-300 font-light">|</span>
               <span className="hidden xl:inline text-stone-500 font-medium text-sm">
@@ -1621,29 +1635,20 @@ export default function App() {
 
 
 
-      {/* Student Feedback & Service Quality Section */}
-      <StudentFeedbackSection
-        feedbacks={feedbacks}
-        universities={universities}
-        institutions={institutions}
-        lang={lang}
-        onAddFeedback={handleAddFeedback}
-        preselectedTargetId={feedbackPreselectId}
-        externalOpenSignal={feedbackOpenSignal}
-      />
-
       {/* Footer */}
       <footer className="bg-stone-900 text-stone-300 pt-8 sm:pt-10 pb-24 lg:pb-10 border-t border-stone-800 text-xs sm:text-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-6 pb-6 border-b border-stone-800">
             <div className="space-y-2">
               <div className="flex items-center gap-2.5 sm:gap-3">
-                <img
-                  src="/assets/aistudio/jami3ati_logo_transparent.png"
-                  alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl object-contain shrink-0"
-                  referrerPolicy="no-referrer"
-                />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 overflow-hidden shrink-0 flex items-center justify-center">
+                  <img
+                    src="/assets/aistudio/jami3ati_emblem_transparent.png"
+                    alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
+                    className="w-full h-[130%] object-cover object-top"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
                 <span className="text-sm sm:text-base font-bold text-white block">
                   {isAr ? 'جامعتي | Jami3ati' : 'Jami3ati | جامعتي'}
                 </span>
