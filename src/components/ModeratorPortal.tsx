@@ -92,33 +92,8 @@ export const ModeratorPortal: React.FC<Props> = ({
     verified_at: '',
   });
 
-  // Local audit log for demo session
-  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([
-    {
-      id: 'log-1',
-      action: 'اعتماد مطابقة علاقة ENSIAS بجامعة محمد الخامس وفق مرسوم الإحداث',
-      actor: 'مدقق البيانات المفتوحة',
-      timestamp: '2026-11-04 11:20:00',
-      target: 'ENSIAS - UM5',
-      status: 'success',
-    },
-    {
-      id: 'log-2',
-      action: 'تحديث رابط البوابة المركزية لجامعة القاضي عياض ومطابقة شهادة SSL',
-      actor: 'المشرف الأكاديمي',
-      timestamp: '2026-11-03 16:45:00',
-      target: 'UCA Marrakech',
-      status: 'info',
-    },
-    {
-      id: 'log-3',
-      action: 'إحالة سجل جامعة الحسن الثاني على المراجعة بانتظار نشر مرسوم التوزيع الجديد',
-      actor: 'مدقق البيانات المفتوحة',
-      timestamp: '2026-11-02 09:15:00',
-      target: 'UH2 Casablanca',
-      status: 'warning',
-    },
-  ]);
+  // Audit events are currently session-local; no durable audit backend exists.
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
 
   // Statistics
   const totalVerified = institutions.filter((i) => i.data_status === 'verified').length +
@@ -474,7 +449,7 @@ export const ModeratorPortal: React.FC<Props> = ({
             }`}
           >
             <History className="w-3.5 h-3.5" />
-            <span>سجل عمليات التدقيق (Audit Trail)</span>
+            <span>سجل عمليات التدقيق (Session Log)</span>
           </button>
         </div>
 
@@ -886,7 +861,7 @@ export const ModeratorPortal: React.FC<Props> = ({
           <div className="bg-white rounded-xl border border-stone-200 p-5 space-y-4 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-200">
               <h3 className="font-bold text-sm text-stone-900">
-                سجل تتبع القرارات والتعديلات (Immutable Audit Trail)
+                سجل محلي مؤقت للقرارات (غير دائم)
               </h3>
               <div className="flex items-center gap-3">
                 <span className="text-xs text-stone-400 font-mono">
@@ -902,6 +877,9 @@ export const ModeratorPortal: React.FC<Props> = ({
               </div>
             </div>
 
+            <p className="text-xs leading-6 text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3">
+              هذا السجل محفوظ في ذاكرة الجلسة فقط، ويمكن فقدانه عند إعادة تحميل الصفحة. لا يُعد سجل تدقيق دائماً أو غير قابل للتلاعب.
+            </p>
             <div className="space-y-2.5">
               {auditLogs.map((log) => (
                 <div

@@ -256,44 +256,27 @@ export default function App() {
   // Moderator portal & auth state
   const [showModeratorPortal, setShowModeratorPortal] = useState(false);
   const [showModeratorLoginModal, setShowModeratorLoginModal] = useState(false);
-  const [currentModeratorUser, setCurrentModeratorUser] = useState<ModeratorUser | null>(() => {
-    try {
-      const saved =
-        localStorage.getItem('jami3ati_moderator_session') ||
-        sessionStorage.getItem('jami3ati_moderator_session');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
+  // Moderator sessions must never be restored from browser storage.
+  // Access remains disabled until a server-verified identity provider exists.
+  const [currentModeratorUser, setCurrentModeratorUser] = useState<ModeratorUser | null>(null);
 
   const handleOpenModeratorPortal = () => {
     setMoreMenuOpen(false);
     navigateTo('moderator');
   };
 
-  const handleModeratorLoginSuccess = (user: ModeratorUser, rememberMe: boolean = true) => {
-    setCurrentModeratorUser(user);
-    try {
-      localStorage.removeItem('jami3ati_moderator_session');
-      sessionStorage.removeItem('jami3ati_moderator_session');
-      const targetStorage = rememberMe ? localStorage : sessionStorage;
-      targetStorage.setItem('jami3ati_moderator_session', JSON.stringify(user));
-    } catch {
-      // Ignore storage errors
-    }
+  const handleModeratorLoginSuccess = (_user: ModeratorUser, _rememberMe: boolean = false) => {
+    // Intentionally fail closed: a client-provided object is not authentication.
+    setCurrentModeratorUser(null);
     setShowModeratorLoginModal(false);
     navigateTo('moderator');
+    showToast(isAr
+      ? 'المصادقة الآمنة غير مهيأة بعد؛ لم يتم منح صلاحية الدخول.'
+      : 'Secure authentication is not configured; access was not granted.');
   };
 
   const handleModeratorSignOut = () => {
     setCurrentModeratorUser(null);
-    try {
-      localStorage.removeItem('jami3ati_moderator_session');
-      sessionStorage.removeItem('jami3ati_moderator_session');
-    } catch {
-      // Ignore
-    }
     navigateTo('moderator');
   };
 
