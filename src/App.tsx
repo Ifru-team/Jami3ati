@@ -947,7 +947,7 @@ export default function App() {
           >
             <div className="w-10 h-10 min-[375px]:w-11 min-[375px]:h-11 sm:w-12 sm:h-12 shrink-0 flex items-center justify-center rounded-xl bg-[#143D30]/5 ring-1 ring-[#143D30]/10 p-1 transition-transform duration-200 hover:scale-[1.03]">
               <img
-                src="/assets/aistudio/jami3ati_emblem_transparent.png"
+                src={`${import.meta.env.BASE_URL}assets/aistudio/jami3ati_emblem_transparent.png`}
                 alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
                 className="w-full h-full object-contain"
                 referrerPolicy="no-referrer"
@@ -1607,7 +1607,7 @@ export default function App() {
               <div className="flex items-center gap-2.5 sm:gap-3">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15 p-1">
                   <img
-                    src="/assets/aistudio/jami3ati_emblem_transparent.png"
+                    src={`${import.meta.env.BASE_URL}assets/aistudio/jami3ati_emblem_transparent.png`}
                     alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
                     className="w-full h-full object-contain"
                     referrerPolicy="no-referrer"
