@@ -16,150 +16,140 @@ export interface DataGovImportResult {
   totalRecords: number;
 }
 
-/**
- * Normalizes raw JSON objects from data.gov.ma schema into typed University array
- */
+const text = (value: unknown): string => value == null ? '' : String(value).trim();
+const optionalText = (value: unknown): string | null => text(value) || null;
+const numberOrZero = (value: unknown): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+const dataStatus = (item: Record<string, any>): 'verified' | 'needs_review' | 'demo' => {
+  if (item.data_status === 'demo') return 'demo';
+  const hasProvenance = Boolean(text(item.source_url) && text(item.source_name) && text(item.verified_at));
+  return item.data_status === 'verified' && hasProvenance ? 'verified' : 'needs_review';
+};
+
+/** Normalize source records without inventing provenance or verification dates. */
 function normalizeUniversities(rawList: any[]): University[] {
   if (!Array.isArray(rawList)) return [];
-
   return rawList.map((item, index) => ({
-    id: String(item.id || item.code_universite || `univ-${index + 1}`),
-    code: String(item.code || item.acronyme || `UNIV-${index + 1}`).toUpperCase(),
-    name_ar: String(item.name_ar || item.nom_ar || item.designation_ar || 'جامعة مغربية'),
-    name_fr: String(item.name_fr || item.nom_fr || item.designation_fr || 'Université Marocaine'),
-    acronym: String(item.acronym || item.code || ''),
-    city_ar: String(item.city_ar || item.ville_ar || 'الرباط'),
-    city_fr: String(item.city_fr || item.ville_fr || 'Rabat'),
-    region_ar: String(item.region_ar || item.region || 'المملكة المغربية'),
-    region_fr: String(item.region_fr || 'Royaume du Maroc'),
-    established_year: Number(item.established_year || item.annee_creation || 1980),
-    website_url: String(item.website_url || item.site_web || 'https://data.gov.ma'),
-    portal_student_url: item.portal_student_url ? String(item.portal_student_url) : null,
-    description_ar: String(item.description_ar || 'مؤسسة جامعية عمومية مدرجة بالسجل الوطني للتعليم العالي.'),
-    description_fr: String(item.description_fr || 'Établissement universitaire public répertorié sur data.gov.ma.'),
+    id: text(item.id || item.code_universite) || `univ-${index + 1}`,
+    code: text(item.code || item.acronyme || `UNIV-${index + 1}`).toUpperCase(),
+    name_ar: text(item.name_ar || item.nom_ar || item.designation_ar),
+    name_fr: text(item.name_fr || item.nom_fr || item.designation_fr),
+    acronym: text(item.acronym || item.code),
+    city_ar: text(item.city_ar || item.ville_ar),
+    city_fr: text(item.city_fr || item.ville_fr),
+    region_ar: text(item.region_ar || item.region),
+    region_fr: text(item.region_fr),
+    established_year: numberOrZero(item.established_year || item.annee_creation),
+    website_url: text(item.website_url || item.site_web),
+    portal_student_url: optionalText(item.portal_student_url),
+    description_ar: text(item.description_ar),
+    description_fr: text(item.description_fr),
     image_url: resolveAssetImage(item.image_url ? String(item.image_url) : undefined),
-    phone: item.phone ? String(item.phone) : null,
-    email: item.email ? String(item.email) : null,
-    address_ar: String(item.address_ar || 'المغرب'),
-    address_fr: String(item.address_fr || 'Maroc'),
-    source_url: String(item.source_url || DATA_GOV_MA_DATASET_URL),
-    source_name: String(item.source_name || 'بوابة البيانات المفتوحة (data.gov.ma) - السجل الوطني لمؤسسات التعليم العالي'),
-    verified_at: String(item.verified_at || '2024-11-01'),
-    data_status: (item.data_status === 'verified' || item.data_status === 'needs_review') ? item.data_status : 'verified',
-    institution_count: Number(item.institution_count || (Array.isArray(item.institutions_list) ? item.institutions_list.length : 1)),
+    phone: optionalText(item.phone),
+    email: optionalText(item.email),
+    address_ar: text(item.address_ar),
+    address_fr: text(item.address_fr),
+    source_url: text(item.source_url),
+    source_name: text(item.source_name),
+    verified_at: text(item.verified_at),
+    data_status: dataStatus(item),
+    institution_count: numberOrZero(item.institution_count || (Array.isArray(item.institutions_list) ? item.institutions_list.length : 0)),
     institutions_list: Array.isArray(item.institutions_list) ? item.institutions_list.map(String) : [],
     disciplines: Array.isArray(item.disciplines) ? item.disciplines : undefined,
   }));
 }
 
-/**
- * Normalizes raw JSON objects from data.gov.ma schema into typed Institution array
- */
+/** Normalize institution records; missing fields remain visibly incomplete for review. */
 function normalizeInstitutions(rawList: any[]): Institution[] {
   if (!Array.isArray(rawList)) return [];
-
   return rawList.map((item, index) => ({
-    id: String(item.id || item.code_etablissement || `inst-${index + 1}`),
-    code: String(item.code || `INST-${index + 1}`).toUpperCase(),
-    university_id: String(item.university_id || item.id_universite || 'univ-um5-rabat'),
-    university_name_ar: String(item.university_name_ar || item.universite_ar || 'الجامعة الأم'),
-    university_name_fr: String(item.university_name_fr || item.universite_fr || 'Université parente'),
-    name_ar: String(item.name_ar || item.nom_ar || 'مؤسسة جامعية'),
-    name_fr: String(item.name_fr || item.nom_fr || 'Établissement supérieur'),
-    type: (item.type === 'engineering_school' || item.type === 'faculty' || item.type === 'institute' || item.type === 'business_school')
-      ? item.type
-      : 'faculty',
-    type_label_ar: String(item.type_label_ar || 'مؤسسة جامعية معتمدة'),
-    type_label_fr: String(item.type_label_fr || 'Établissement d’enseignement supérieur'),
-    city_ar: String(item.city_ar || item.ville_ar || 'الرباط'),
-    city_fr: String(item.city_fr || item.ville_fr || 'Rabat'),
-    campus_ar: String(item.campus_ar || item.campus || 'الحرم الجامعي الرئيسي'),
-    campus_fr: String(item.campus_fr || 'Campus principal'),
-    website_url: String(item.website_url || item.site_web || 'https://data.gov.ma'),
-    phone: item.phone ? String(item.phone) : null,
-    email: item.email ? String(item.email) : null,
-    source_url: String(item.source_url || DATA_GOV_MA_DATASET_URL),
-    source_name: String(item.source_name || 'بوابة البيانات المفتوحة (data.gov.ma) - السجل الوطني لمؤسسات التعليم العالي'),
-    verified_at: String(item.verified_at || '2024-11-01'),
-    data_status: (item.data_status === 'verified' || item.data_status === 'needs_review') ? item.data_status : 'verified',
+    id: text(item.id || item.code_etablissement) || `inst-${index + 1}`,
+    code: text(item.code || `INST-${index + 1}`).toUpperCase(),
+    university_id: text(item.university_id || item.id_universite),
+    university_name_ar: text(item.university_name_ar || item.universite_ar),
+    university_name_fr: text(item.university_name_fr || item.universite_fr),
+    name_ar: text(item.name_ar || item.nom_ar),
+    name_fr: text(item.name_fr || item.nom_fr),
+    type: (item.type === 'engineering_school' || item.type === 'faculty' || item.type === 'institute' || item.type === 'business_school') ? item.type : 'faculty',
+    type_label_ar: text(item.type_label_ar),
+    type_label_fr: text(item.type_label_fr),
+    city_ar: text(item.city_ar || item.ville_ar),
+    city_fr: text(item.city_fr || item.ville_fr),
+    campus_ar: text(item.campus_ar || item.campus),
+    campus_fr: text(item.campus_fr),
+    website_url: text(item.website_url || item.site_web),
+    phone: optionalText(item.phone),
+    email: optionalText(item.email),
+    source_url: text(item.source_url),
+    source_name: text(item.source_name),
+    verified_at: text(item.verified_at),
+    data_status: dataStatus(item),
     admission_type: item.admission_type === 'regulated' || item.admission_type === 'open'
       ? item.admission_type
       : (String(item.access_mode_ar || '').includes('محدود') || String(item.access_mode_ar || '').includes('مباراة') ? 'regulated' : 'open'),
-    disciplines: Array.isArray(item.disciplines) ? item.disciplines : ['science_tech'],
-    disciplines_labels_ar: Array.isArray(item.disciplines_labels_ar) ? item.disciplines_labels_ar : ['علوم وتكنولوجيا'],
-    disciplines_labels_fr: Array.isArray(item.disciplines_labels_fr) ? item.disciplines_labels_fr : ['Sciences & Tech'],
-    programs_summary_ar: Array.isArray(item.programs_summary_ar) ? item.programs_summary_ar : ['تكوينات جامعية وأكاديمية معتمدة'],
-    programs_summary_fr: Array.isArray(item.programs_summary_fr) ? item.programs_summary_fr : ['Formations universitaires accréditées'],
-    access_mode_ar: String(item.access_mode_ar || 'ولوج معتمد وفق المذكرات الوزارية المنظمة.'),
-    access_mode_fr: String(item.access_mode_fr || 'Conditions d’accès selon les circulaires ministérielles.'),
+    disciplines: Array.isArray(item.disciplines) ? item.disciplines : undefined,
+    disciplines_labels_ar: Array.isArray(item.disciplines_labels_ar) ? item.disciplines_labels_ar : [],
+    disciplines_labels_fr: Array.isArray(item.disciplines_labels_fr) ? item.disciplines_labels_fr : [],
+    programs_summary_ar: Array.isArray(item.programs_summary_ar) ? item.programs_summary_ar : [],
+    programs_summary_fr: Array.isArray(item.programs_summary_fr) ? item.programs_summary_fr : [],
+    access_mode_ar: text(item.access_mode_ar),
+    access_mode_fr: text(item.access_mode_fr),
     image_url: resolveAssetImage(item.image_url ? String(item.image_url) : undefined),
   }));
 }
 
-/**
- * Fetches JSON dataset from data.gov.ma API or fallback official mirror
- */
+/** Fetch the CKAN dataset; fall back to the bundled snapshot when unavailable. */
 export async function importDataGovMaData(): Promise<DataGovImportResult> {
   let isLive = false;
   let parsedRawData: any = null;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3500);
 
   try {
-    // Attempt live fetch with a short 3.5s timeout (in case of browser CORS restrictions on data.gov.ma)
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
-
     const response = await fetch(DATA_GOV_MA_API_ENDPOINT, {
       signal: controller.signal,
-      headers: {
-        Accept: 'application/json',
-      },
-    }).catch(() => null);
-
-    clearTimeout(timeoutId);
-
-    if (response && response.ok) {
+      headers: { Accept: 'application/json' },
+    });
+    if (response.ok) {
       const json = await response.json();
-      if (json && json.result) {
+      if (json?.success && json?.result && Array.isArray(json.result.universities)) {
         parsedRawData = json.result;
         isLive = true;
       }
     }
   } catch (err) {
-    console.info('Live data.gov.ma fetch bypassed, applying certified national dataset mirror:', err);
+    console.info('Live data.gov.ma fetch unavailable; using bundled dataset snapshot.', err);
+  } finally {
+    clearTimeout(timeoutId);
   }
 
-  // Fallback to local verified data.gov.ma higher education dataset
-  if (!parsedRawData || !parsedRawData.universities) {
+  if (!parsedRawData) {
     parsedRawData = localDataGovDataset;
     isLive = false;
   }
 
-  const normalizedUniversities = normalizeUniversities(parsedRawData.universities || []);
-  const normalizedInstitutions = normalizeInstitutions(parsedRawData.institutions || []);
-
+  const universities = normalizeUniversities(parsedRawData.universities || []);
+  const institutions = normalizeInstitutions(parsedRawData.institutions || []);
   const result: DataGovImportResult = {
-    universities: normalizedUniversities,
-    institutions: normalizedInstitutions,
+    universities,
+    institutions,
     isLiveFromDataGov: isLive,
-    source: parsedRawData.source || DATA_GOV_MA_DATASET_URL,
-    publisher: parsedRawData.publisher || 'Ministère de l’Enseignement Supérieur (MESRSI) / data.gov.ma',
-    lastUpdated: parsedRawData.last_updated || new Date().toISOString().split('T')[0],
-    totalRecords: normalizedUniversities.length + normalizedInstitutions.length,
+    source: text(parsedRawData.source),
+    publisher: text(parsedRawData.publisher),
+    lastUpdated: text(parsedRawData.last_updated),
+    totalRecords: universities.length + institutions.length,
   };
 
-  // Cache to localStorage for instantaneous future boot
   try {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(result));
-  } catch (e) {
-    console.warn('Could not cache imported data.gov.ma dataset in localStorage', e);
+  } catch (error) {
+    console.warn('Could not cache imported dataset in localStorage.', error);
   }
-
   return result;
 }
 
-/**
- * Reads cached data.gov.ma data from localStorage if available
- */
 export function getCachedDataGovData(): DataGovImportResult | null {
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -169,26 +159,18 @@ export function getCachedDataGovData(): DataGovImportResult | null {
         return parsed as DataGovImportResult;
       }
     }
-  } catch (e) {
-    console.warn('Failed to parse cached data.gov.ma dataset', e);
+  } catch (error) {
+    console.warn('Failed to parse cached data.gov.ma dataset.', error);
   }
   return null;
 }
 
-/**
- * Loads the primary higher education dataset: checks cache or imports directly
- */
 export async function loadInitialDataGovDataset(): Promise<DataGovImportResult> {
   const cached = getCachedDataGovData();
-  if (cached && cached.universities.length >= 10) {
-    return cached;
-  }
-  return await importDataGovMaData();
+  if (cached && cached.universities.length >= 10) return cached;
+  return importDataGovMaData();
 }
 
-/**
- * Utility to download the current dataset as a verified JSON file
- */
 export function exportDatasetToJson(universities: University[], institutions: Institution[]) {
   const payload = {
     export_metadata: {
@@ -201,7 +183,6 @@ export function exportDatasetToJson(universities: University[], institutions: In
     universities,
     institutions,
   };
-
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
