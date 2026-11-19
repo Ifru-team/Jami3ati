@@ -946,6 +946,14 @@ export default function App() {
             aria-label={isAr ? 'العودة إلى الصفحة الرئيسية — جامعتي' : 'Retour à l’accueil — Jami3ati'}
           >
             <span className="flex items-center gap-1.5 font-extrabold text-[#143D30]">
+              <img
+                src={`${import.meta.env.BASE_URL}assets/logo/NBJami3ati.png`}
+                alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
+                className="h-8 w-8 sm:h-10 sm:w-10 object-contain shrink-0"
+                width={40}
+                height={40}
+                decoding="async"
+              />
               <span>{isAr ? 'جامعتي' : 'Jami3ati'}</span>
               <span className="hidden xl:inline text-stone-300 font-light">|</span>
               <span className="hidden xl:inline text-stone-500 font-medium text-sm">
@@ -1597,6 +1605,15 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-6 pb-6 border-b border-stone-800">
             <div className="space-y-2">
               <div className="flex items-center gap-2.5 sm:gap-3">
+                <img
+                  src={`${import.meta.env.BASE_URL}assets/logo/NBJami3ati.png`}
+                  alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
+                  className="h-10 w-10 sm:h-12 sm:w-12 object-contain shrink-0"
+                  width={48}
+                  height={48}
+                  loading="lazy"
+                  decoding="async"
+                />
                 <span className="text-sm sm:text-base font-bold text-white block">
                   {isAr ? 'جامعتي | Jami3ati' : 'Jami3ati | جامعتي'}
                 </span>
