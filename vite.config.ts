@@ -31,26 +31,6 @@ export default defineConfig(() => {
           display: 'standalone',
           start_url: base,
           scope: base,
-          icons: [
-            {
-              src: `${base}pwa-192x192.png`,
-              sizes: '192x192',
-              type: 'image/png',
-              purpose: 'any',
-            },
-            {
-              src: `${base}pwa-512x512.png`,
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any',
-            },
-            {
-              src: `${base}pwa-maskable-512x512.png`,
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'maskable',
-            },
-          ],
         },
         devOptions: {
           enabled: true,
