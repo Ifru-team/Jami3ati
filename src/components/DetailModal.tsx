@@ -1,7 +1,7 @@
 import React from 'react';
-import { University, Institution, OfficialAnnouncement, StudentFeedback, Language } from '../types';
+import { University, Institution, OfficialAnnouncement, Language } from '../types';
 import { translations } from '../data/translations';
-import { X, ExternalLink, MapPin, Phone, Mail, Building2, GraduationCap, AlertCircle, BookOpen, Share2, Bookmark, Scale, Navigation, Calendar, CalendarPlus, Clock, Star, MessageSquare, Plus, ShieldCheck, Briefcase, Sparkles, TrendingUp, Download } from 'lucide-react';
+import { X, ExternalLink, MapPin, Phone, Mail, Building2, GraduationCap, AlertCircle, BookOpen, Share2, Bookmark, Scale, Navigation, Calendar, CalendarPlus, Clock, ShieldCheck, Briefcase, Sparkles, TrendingUp, Download } from 'lucide-react';
 import { SourceAttribution } from './SourceAttribution';
 import { DataStatusBadge } from './DataStatusBadge';
 import { ModalBackdrop } from './ModalBackdrop';
@@ -22,11 +22,8 @@ interface Props {
   itemType: 'university' | 'institution';
   lang: Language;
   announcements?: OfficialAnnouncement[];
-  feedbacks?: StudentFeedback[];
-  relatedInstitutionIds?: string[];
   onClose: () => void;
   onReport: (item: University | Institution) => void;
-  onShareExperience?: (item: University | Institution) => void;
   isCompared?: boolean;
   onToggleCompare?: (item: University | Institution) => void;
   isBookmarked?: boolean;
@@ -39,11 +36,8 @@ export const DetailModal: React.FC<Props> = ({
   itemType,
   lang,
   announcements = [],
-  feedbacks = [],
-  relatedInstitutionIds = [],
   onClose,
   onReport,
-  onShareExperience,
   isCompared = false,
   onToggleCompare,
   isBookmarked = false,
@@ -74,16 +68,7 @@ export const DetailModal: React.FC<Props> = ({
   const directionsUrl = getOpenStreetMapDirectionsUrl(coords.lat, coords.lng);
   const matchedAnnouncements = getMatchingAnnouncementsForItem(item, itemType, announcements);
   const careerProfiles = getCareerProfilesForItem(item, itemType);
-  const itemFeedbacks = feedbacks.filter(
-    (f) =>
-      f.status === 'approved' &&
-      (f.institution_id === item.id ||
-        (isUniv && relatedInstitutionIds.includes(f.institution_id)))
-  );
-  const avgFeedbackRating =
-    itemFeedbacks.length > 0
-      ? (itemFeedbacks.reduce((sum, f) => sum + f.rating, 0) / itemFeedbacks.length).toFixed(1)
-      : null;
+
 
   const handleDownloadCareerSheet = () => {
     const lines = [
@@ -485,90 +470,6 @@ export const DetailModal: React.FC<Props> = ({
               </div>
             </div>
           )}
-
-          {/* Student & Alumni Experiences Section */}
-          <div className="bg-[#FAF8F5] rounded-xl border border-stone-200 p-4 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-[#143D30]" />
-                <h3 className="text-xs font-bold text-stone-900">
-                  {isAr ? 'تجارب وتقييمات الطلبة والخريجين' : 'Retours d’expérience étudiants & lauréats'}
-                </h3>
-                {avgFeedbackRating && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-mono font-bold">
-                    <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                    <span>{avgFeedbackRating} / 5</span>
-                    <span className="text-amber-700 font-normal">({itemFeedbacks.length})</span>
-                  </span>
-                )}
-              </div>
-
-              {onShareExperience && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    onShareExperience(item);
-                  }}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#143D30] hover:bg-[#0e2c22] text-white text-[11px] font-bold transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5 text-amber-300" />
-                  <span>{isAr ? 'أضف تجربتك' : 'Partager un avis'}</span>
-                </button>
-              )}
-            </div>
-
-            {itemFeedbacks.length === 0 ? (
-              <p className="text-xs text-stone-500 bg-white rounded-xl border border-stone-200/80 p-3 leading-relaxed">
-                {isAr
-                  ? 'لا توجد تقييمات منشورة بعد لهذه المؤسسة. يمكنك مشاركة تجربتك المجهولة لمساعدة الطلبة الجدد.'
-                  : 'Aucun avis vérifié publié pour cet établissement pour le moment. Partagez votre expérience anonyme pour aider les futurs étudiants.'}
-              </p>
-            ) : (
-              <div className="space-y-2.5">
-                {itemFeedbacks.slice(0, 3).map((fb) => (
-                  <div
-                    key={fb.id}
-                    className="bg-white rounded-xl border border-stone-200/90 p-3 space-y-1.5"
-                  >
-                    <div className="flex items-center justify-between gap-2 text-[11px]">
-                      <div className="flex items-center gap-2 text-stone-600 font-semibold">
-                        <span className="text-emerald-800">
-                          {isAr ? fb.service_label_ar : fb.service_label_fr}
-                        </span>
-                        <span aria-hidden="true">·</span>
-                        <span className="text-stone-500 font-normal">
-                          {isAr ? fb.student_level_ar : fb.student_level_fr}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-0.5 shrink-0">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`w-3 h-3 ${
-                              star <= fb.rating
-                                ? 'fill-amber-400 text-amber-400'
-                                : 'text-stone-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-xs text-stone-700 leading-relaxed">
-                      « {isAr ? fb.comment_ar : fb.comment_fr} »
-                    </p>
-                    <div className="flex items-center justify-between text-[10px] text-stone-400 pt-1">
-                      <span className="font-mono">{fb.created_at}</span>
-                      <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
-                        <ShieldCheck className="w-3 h-3" />
-                        <span>{isAr ? 'مُدقّق ومجهول الهوية' : 'Vérifié & anonyme'}</span>
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* Verified Contacts Section */}
           <div>
