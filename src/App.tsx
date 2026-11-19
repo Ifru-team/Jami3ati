@@ -945,14 +945,6 @@ export default function App() {
             className="text-sm min-[375px]:text-[15px] sm:text-lg font-bold tracking-tight text-[#143D30] whitespace-nowrap shrink-0 flex items-center gap-1 min-[375px]:gap-1.5 sm:gap-2 focus-visible:ring-2 focus-visible:ring-[#143D30] focus-visible:outline-none rounded-lg p-0.5 sm:p-1"
             aria-label={isAr ? 'العودة إلى الصفحة الرئيسية — جامعتي' : 'Retour à l’accueil — Jami3ati'}
           >
-            <div className="w-10 h-10 min-[375px]:w-11 min-[375px]:h-11 sm:w-12 sm:h-12 shrink-0 flex items-center justify-center rounded-xl bg-[#143D30]/5 ring-1 ring-[#143D30]/10 p-1 transition-transform duration-200 hover:scale-[1.03]">
-              <img
-                src={`${import.meta.env.BASE_URL}assets/aistudio/jami3ati_emblem_transparent.png`}
-                alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
-                className="w-full h-full object-contain"
-                referrerPolicy="no-referrer"
-              />
-            </div>
             <span className="flex items-center gap-1.5 font-extrabold text-[#143D30]">
               <span>{isAr ? 'جامعتي' : 'Jami3ati'}</span>
               <span className="hidden xl:inline text-stone-300 font-light">|</span>
@@ -1605,14 +1597,6 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-6 pb-6 border-b border-stone-800">
             <div className="space-y-2">
               <div className="flex items-center gap-2.5 sm:gap-3">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15 p-1">
-                  <img
-                    src={`${import.meta.env.BASE_URL}assets/aistudio/jami3ati_emblem_transparent.png`}
-                    alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
-                    className="w-full h-full object-contain"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
                 <span className="text-sm sm:text-base font-bold text-white block">
                   {isAr ? 'جامعتي | Jami3ati' : 'Jami3ati | جامعتي'}
                 </span>
