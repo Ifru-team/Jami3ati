@@ -28,11 +28,11 @@
 5. **توثيق المصدر وتاريخ المراجعة**: لكل سجل حقول `source_url`, `source_name`, `verified_at`, `data_status`.
 6. **ثنائية اللغة ودعم كامل للـ RTL**: العربية كواجهة رئيسية بخط `Tajawal`، مع زر تبديل فوري إلى الفرنسية.
 7. **زر "الإبلاغ عن معلومة غير صحيحة"**: نموذج لتقديم التصحيحات مع إرفاق رابط المصدر الرسمي كشرط إلزامي.
-8. **فضاء المكلفين بالموقع (Moderator Portal)**:
+8. **فضاء المكلفين بالموقع (Moderator Portal) — واجهة تجريبية غير مفعّلة للإدارة الإنتاجية**:
    - لوحة حكامة مخصصة لمدققي البيانات والمشرفين الأكاديميين.
    - طابور معالجة البلاغات مع مطابقة الروابط الرسمية.
-   - محرر بيانات سريع للمؤسسات مع سجل عمليات تدقيق غير قابل للتلاعب (Audit Trail).
-9. **لوحة إدارة تجريبية (Demo Admin)**: لإضافة المؤسسات وتوثيق مصادرها وتصدير البيانات كـ JSON.
+   - محرر بيانات سريع للمؤسسات مع سجل محلي مؤقت للجلسة؛ لا يمثل Audit Trail دائماً أو غير قابل للتلاعب.
+9. **واجهة إدارة تجريبية (Demo Admin) — لا تستخدم لإدارة بيانات إنتاجية**: لإضافة المؤسسات وتوثيق مصادرها وتصدير البيانات كـ JSON.
 10. **قسم المواعيد الرسمية الموثقة**: عرض المواعيد الصادرة ببلاغات أو مراسيم معلنة فقط.
 11. **صفحة ميثاق البيانات**: شرح حدود النموذج وإخلاء المسؤولية القانونية.
 
@@ -46,107 +46,40 @@
 
 ---
 
-## 🏗️ 4. المعمارية وشجرة الملفات
+## 🏗️ 4. المعمارية الحالية
 
-### معمارية المشروع:
-- **Frontend**: React 19 + TypeScript + Vite + Tailwind CSS + Lucide Icons + Motion.
-- **Backend**: Python 3.11 + FastAPI + Pydantic v2 + SQLAlchemy.
-- **Database**: PostgreSQL 16.
-- **Containerization**: Docker & Docker Compose.
+المستودع الحالي يحتوي على واجهة أمامية مبنية باستخدام:
 
-### شجرة الملفات:
-```
-jami3ati/
-├── README.md                      # التوثيق الشامل بالعربية
-├── docker-compose.yml             # تشغيل الحاويات (Postgres + Backend + Frontend)
-├── package.json                   # إعدادات الواجهة والاعتماديات
-├── vite.config.ts                 # إعدادات Vite
-├── index.html                     # نقطة دخول الويب مع خطوط Tajawal
-├── src/
-│   ├── App.tsx                    # واجهة التطبيق الرئيسية والبحث والدليل
-│   ├── types/index.ts             # واجهات TypeScript للبيانات
-│   ├── data/
-│   │   ├── translations.ts        # نصوص الترجمة العربية والفرنسية
-│   │   └── seedData.ts            # بيانات الجامعات والمؤسسات الموثقة
-│   ├── components/
-│   │   ├── UniversityCard.tsx     # بطاقة الجامعة
-│   │   ├── InstitutionCard.tsx    # بطاقة المدرسة/الكلية والتبعية
-│   │   ├── DetailModal.tsx        # بطاقة التفاصيل ومصدر التوثيق
-│   │   ├── ReportModal.tsx        # نموذج الإبلاغ عن خطأ مع رابط الإثبات
-│   │   ├── SourceAttribution.tsx  # مكون الشفافية وتاريخ التحقق
-│   │   ├── DataStatusBadge.tsx    # شارات verified / needs_review / demo
-│   │   ├── AnnouncementsSection.tsx # المواعيد الرسمية الموثقة
-│   │   ├── AboutDataSection.tsx   # ميثاق البيانات وإخلاء المسؤولية
-│   │   └── AdminPanel.tsx         # لوحة الإدارة التجريبية وتصدير البيانات
-│   └── assets/images/             # صور معمارية حقيقية للمؤسسات الجامعية
-│
-├── backend/
-│   ├── Dockerfile                 # صورة الـ Backend في Docker
-│   ├── requirements.txt           # مكتبات Python (FastAPI, SQLAlchemy, Pydantic)
-│   ├── app/
-│   │   ├── main.py                # نقطة تشغيل FastAPI وتوثيق Swagger
-│   │   ├── core/
-│   │   │   ├── config.py          # الإعدادات ومتغيرات البيئة
-│   │   │   └── database.py        # اتصال PostgreSQL
-│   │   ├── models/                # نماذج SQLAlchemy للجداول
-│   │   ├── schemas/               # نماذج Pydantic للتحقق
-│   │   ├── api/routes/            # نقاط نهاية الـ REST API
-│   │   └── seed/                  # سكريبت وبيانات seed_data.json
-│   └── tests/                     # اختبارات pytest للـ API
-│
-├── docs/                          # وثائق الرؤية والمصادر وسجل القرارات
-└── scripts/                       # نصوص التشغيل وحقن البيانات
-```
+- React 19 وTypeScript
+- Vite
+- Tailwind CSS
+- Firebase ضمن الاعتماديات، لكن وجود الحزمة لا يعني أن المصادقة أو خدمات Firebase مهيأة أو مستخدمة فعلياً.
+- Progressive Web App عبر `vite-plugin-pwa`
 
----
+**لا توجد حالياً خدمة Backend أو قاعدة بيانات خادمية موثقة ضمن شجرة الملفات.** لذلك فإن بعض الوظائف الإدارية والتقارير والتقييمات تعتمد على حالة الواجهة و`localStorage`، ولا ينبغي اعتبارها تخزيناً مركزياً أو موثوقاً.
 
-## 🚀 5. خطوات التثبيت والتشغيل
+## 🚀 5. التثبيت والتشغيل
 
-### الطريقة الأولى: التشغيل الكامل عبر Docker Compose (موصى بها)
+يتطلب التشغيل المحلي Node.js متوافقاً مع إصدار Vite المستخدم وnpm.
+
 ```bash
-# 1. استنساخ المستودع والدخول للمجلد
-cd jami3ati
-
-# 2. تشغيل الحاويات بالخلفية
-docker-compose up --build -d
-
-# 3. حقن البيانات الموثقة والتجريبية
-docker-compose exec backend python app/seed/seed.py
-```
-- **الواجهة الأمامية**: افتح المتصفح على [http://localhost:3000](http://localhost:3000)
-- **توثيق الـ API التفاعلي (Swagger)**: [http://localhost:8000/api/v1/docs](http://localhost:8000/api/v1/docs)
-
----
-
-### الطريقة الثانية: التشغيل المحلي المباشر
-
-#### 1. تشغيل الواجهة (Frontend):
-```bash
+git clone https://github.com/Ifru-team/Jami3ati.git
+cd Jami3ati
 npm install
 npm run dev
 ```
 
-#### 2. تشغيل الخلفية (Backend):
+لإنشاء نسخة الإنتاج:
+
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # في Linux/macOS أو venv\Scripts\activate في Windows
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+npm run lint
+npm run build
+npm run preview
 ```
 
----
+## 🧪 6. الاختبارات والتحقق
 
-## 🧪 6. تشغيل الاختبارات
-
-### اختبارات الـ Backend (FastAPI):
-```bash
-docker-compose exec backend pytest
-# أو محلياً:
-cd backend && pytest
-```
-
----
+سير العمل الحالي في GitHub Actions يتحقق من TypeScript وينشئ نسخة الإنتاج للواجهة الأمامية. لا توجد حالياً اختبارات Backend في هذا المستودع، لذلك لا يعلن CI عن اختبار خدمة خلفية غير موجودة.
 
 ## ⚖️ 7. حدود النموذج والآفاق المستقبلية
 - **ما هو موثق ومحقق الآن**: جامعة محمد الخامس بالرباط، ENSIAS، وجامعة القاضي عياض بمراكش.
