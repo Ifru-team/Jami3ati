@@ -1609,7 +1609,7 @@ export default function App() {
                   <img
                     src="/assets/aistudio/jami3ati_emblem_transparent.png"
                     alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
-                    className="w-full h-[130%] object-cover object-top"
+                    className="w-full h-full object-contain"
                     referrerPolicy="no-referrer"
                   />
                 </div>
