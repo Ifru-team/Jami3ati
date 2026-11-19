@@ -314,16 +314,6 @@ export default function App() {
 
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportTargetItem, setReportTargetItem] = useState<University | Institution | null>(null);
-  const [feedbackPreselectId, setFeedbackPreselectId] = useState<string | null>(null);
-  const [feedbackOpenSignal, setFeedbackOpenSignal] = useState(0);
-
-  const handleShareExperienceFor = (item: University | Institution) => {
-    setFeedbackPreselectId(item.id);
-    setFeedbackOpenSignal((prev) => prev + 1);
-    setTimeout(() => {
-      document.getElementById('student-feedback')?.scrollIntoView({ behavior: 'smooth' });
-    }, 80);
-  };
 
   // Toast notification state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -850,17 +840,8 @@ export default function App() {
           itemType={selectedItem.type}
           lang={lang}
           announcements={announcements}
-          feedbacks={feedbacks}
-          relatedInstitutionIds={
-            selectedItem.type === 'university'
-              ? institutions
-                  .filter((i) => i.university_id === selectedItem.item.id)
-                  .map((i) => i.id)
-              : []
-          }
           onClose={() => setSelectedItem(null)}
           onReport={(item) => handleOpenReport(item)}
-          onShareExperience={(item) => handleShareExperienceFor(item)}
           isCompared={comparedItems.some((c) => c.item.id === selectedItem.item.id)}
           onToggleCompare={(item) => handleToggleCompare(item, selectedItem.type)}
           isBookmarked={isBookmarked(selectedItem.item.id)}
@@ -964,11 +945,11 @@ export default function App() {
             className="text-sm min-[375px]:text-[15px] sm:text-lg font-bold tracking-tight text-[#143D30] whitespace-nowrap shrink-0 flex items-center gap-1 min-[375px]:gap-1.5 sm:gap-2 focus-visible:ring-2 focus-visible:ring-[#143D30] focus-visible:outline-none rounded-lg p-0.5 sm:p-1"
             aria-label={isAr ? 'العودة إلى الصفحة الرئيسية — جامعتي' : 'Retour à l’accueil — Jami3ati'}
           >
-            <div className="w-11 h-11 min-[375px]:w-12 min-[375px]:h-12 sm:w-14 sm:h-14 overflow-hidden shrink-0 flex items-center justify-center transition-all duration-200 hover:scale-105">
+            <div className="w-10 h-10 min-[375px]:w-11 min-[375px]:h-11 sm:w-12 sm:h-12 shrink-0 flex items-center justify-center rounded-xl bg-[#143D30]/5 ring-1 ring-[#143D30]/10 p-1 transition-transform duration-200 hover:scale-[1.03]">
               <img
                 src="/assets/aistudio/jami3ati_emblem_transparent.png"
                 alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
-                className="w-full h-[130%] object-cover object-top"
+                className="w-full h-full object-contain"
                 referrerPolicy="no-referrer"
               />
             </div>
@@ -1624,7 +1605,7 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-6 pb-6 border-b border-stone-800">
             <div className="space-y-2">
               <div className="flex items-center gap-2.5 sm:gap-3">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 overflow-hidden shrink-0 flex items-center justify-center">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15 p-1">
                   <img
                     src="/assets/aistudio/jami3ati_emblem_transparent.png"
                     alt={isAr ? 'شعار جامعتي' : 'Logo Jami3ati'}
